@@ -1,5 +1,5 @@
 import { promises as fs } from 'fs';
-import { HttpCall } from 'test/lib/models';
+import { HttpCall } from 'test-new/libs/models';
 import { Tests } from 'test/lib/tests';
 
 const getHeaders: HttpCall = {
@@ -246,5 +246,169 @@ describe('CORS headers', () => {
       getOverriddenCORSHeaders,
       3000
     );
+  });
+});
+
+describe('Add CORS headers', () => {
+  const tests = new Tests('ui');
+
+  const environmentHeadersSelector =
+    'app-headers-list#environment-headers .headers-list .header-item';
+
+  it('Switch to environment settings and check headers count', async () => {
+    await tests.helpers.switchView('ENV_HEADERS');
+
+    await tests.helpers.countElements(environmentHeadersSelector, 1);
+  });
+
+  describe('Check environment headers', () => {
+    ['Content-Type', 'application/xml'].forEach((expected, index) => {
+      it(`Row 1 input ${
+        index + 1
+      } should be equal to ${expected}`, async () => {
+        const value = await tests.helpers.getElementValue(
+          `${environmentHeadersSelector}:nth-of-type(1) input:nth-of-type(${
+            index + 1
+          })`
+        );
+        expect(value).to.equal(expected);
+      });
+    });
+  });
+
+  it('Click on "Add CORS headers" button and check headers count', async () => {
+    await tests.helpers.elementClick(
+      'app-headers-list#environment-headers button.add-header-secondary'
+    );
+
+    await tests.helpers.countElements(environmentHeadersSelector, 4);
+  });
+
+  describe('Check environment headers', () => {
+    [
+      'Content-Type',
+      'application/xml',
+      'Access-Control-Allow-Origin',
+      '*',
+      'Access-Control-Allow-Methods',
+      'GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS',
+      'Access-Control-Allow-Headers',
+      'Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With'
+    ].forEach((expected, index) => {
+      it(`Row ${Math.ceil((index + 1) / 2)} input ${
+        index + 1
+      } should be equal to ${expected}`, async () => {
+        const value = await tests.helpers.getElementValue(
+          `${environmentHeadersSelector}:nth-of-type(${Math.ceil(
+            (index + 1) / 2
+          )}) input:nth-of-type(${(index + 1) % 2 === 0 ? 2 : 1})`
+        );
+        expect(value).to.equal(expected);
+      });
+    });
+  });
+});
+
+describe('Headers tabs', () => {
+  const tests = new Tests('ui');
+
+  it('Headers tab shows the header count', async () => {
+    const headersTabSelector =
+      '#route-responses-menu .nav.nav-tabs .nav-item:nth-child(2)';
+
+    let text = await tests.helpers.getElementText(headersTabSelector);
+    expect(text).to.equal('Headers 1');
+
+    await tests.helpers.switchTab('HEADERS');
+    await tests.helpers.addHeader('route-response-headers', {
+      key: 'route-header',
+      value: 'route-header'
+    });
+
+    // this is needed for the tab re-render to complete
+    await tests.app.client.pause(100);
+    text = await tests.helpers.getElementText(headersTabSelector);
+    expect(text).to.equal('Headers 2');
+
+    await tests.helpers.addHeader('route-response-headers', {
+      key: 'route-header-2',
+      value: 'route-header-2'
+    });
+
+    // this is needed for the tab re-render to complete
+    await tests.app.client.pause(100);
+    text = await tests.helpers.getElementText(headersTabSelector);
+    expect(text).to.equal('Headers 3');
+
+    await tests.helpers.addRouteResponse();
+    await tests.helpers.countRouteResponses(2);
+
+    // this is needed for the tab re-render to complete
+    await tests.app.client.pause(100);
+    text = await tests.helpers.getElementText(headersTabSelector);
+    expect(text).to.equal('Headers');
+
+    await tests.helpers.switchTab('HEADERS');
+    await tests.helpers.addHeader('route-response-headers', {
+      key: 'route-header-3',
+      value: 'route-header-3'
+    });
+
+    // this is needed for the tab re-render to complete
+    await tests.app.client.pause(100);
+    text = await tests.helpers.getElementText(headersTabSelector);
+    expect(text).to.equal('Headers 1');
+  });
+});
+
+describe('Headers typeahead', () => {
+  const typeaheadEntrySelector = 'ngb-typeahead-window button:first-of-type';
+
+  const testCases = [
+    {
+      description: 'should use the typeahead in the route headers',
+      headers: 'route-response-headers',
+      preHook: async () => {
+        await tests.helpers.switchTab('HEADERS');
+      }
+    },
+    {
+      description: 'should use the typeahead in the environment headers',
+      headers: 'environment-headers',
+      preHook: async () => {
+        await tests.helpers.switchView('ENV_HEADERS');
+      }
+    },
+    {
+      description: 'should use the typeahead in the proxy request headers',
+      headers: 'env-proxy-req-headers',
+      preHook: async () => {
+        await tests.helpers.switchView('ENV_PROXY');
+      }
+    },
+    {
+      description: 'should use the typeahead in the proxy response headers',
+      headers: 'env-proxy-res-headers',
+      preHook: async () => {
+        await tests.helpers.switchView('ENV_PROXY');
+      }
+    }
+  ];
+
+  testCases.forEach((testCase) => {
+    const headersSelector = `app-headers-list#${testCase.headers}`;
+    const headerKeySelector = `${headersSelector} .headers-list .header-item:last-of-type input:nth-of-type(1)`;
+
+    it(testCase.description, async () => {
+      await testCase.preHook();
+      await tests.helpers.elementClick(
+        `${headersSelector} button:first-of-type`
+      );
+      await tests.helpers.setElementValue(headerKeySelector, 'typ');
+      await tests.helpers.waitElementExist(typeaheadEntrySelector);
+      await tests.helpers.elementClick(typeaheadEntrySelector);
+      const headerName = await tests.helpers.getElementValue(headerKeySelector);
+      expect(headerName).to.equal('Content-Type');
+    });
   });
 });

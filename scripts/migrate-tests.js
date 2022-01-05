@@ -9,9 +9,19 @@ const glob = require('glob');
  */
 
 glob(
-  './test/data/**/@(environment*|*v2|*v3).json',
+  './test-new/data/mock-envs/*.json',
+  './test-new/data/mock-envs/@(environment*|*v2|*v3).json',
   {
     ignore: [
+      // TODO
+      './test-new/data/mock-envs/incompatible.json',
+      './test-new/data/mock-envs/migration.json',
+      './test-new/data/mock-envs/schema-broken.json',
+      './test-new/data/mock-envs/schema-broken-repair.json',
+      './test-new/data/mock-envs/schema-uuid-dedup-1.json',
+      './test-new/data/mock-envs/schema-uuid-dedup-2.json',
+      './test-new/data/res/import-openapi/references/@(*v2|*v3).json',
+      // TBR
       './test/data/import/new/**/*',
       './test/data/migrations/**/*',
       './test/data/schema-validation/**/*'
