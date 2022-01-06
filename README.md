@@ -38,6 +38,12 @@ Mockoon offers many features:
 
 You can check the [complete list](https://mockoon.com/features) on the website.
 
+## Install
+
+<a href="https://heroku.com/deploy?template=https://https://github.com/sridhar75/mockoon">
+  <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
+</a>
+
 ## Download
 
 You can get Mockoon [latest release](https://github.com/mockoon/mockoon/releases/latest) directly from this repository or on the official [website](https://mockoon.com/#download). Mockoon is also available through Homebrew `brew install --cask mockoon`, Snap store `snap install mockoon`, Chocolatey `choco install mockoon` or AUR `yay -S mockoon-bin` (or any other AUR helper).
