@@ -40,7 +40,7 @@ You can check the [complete list](https://mockoon.com/features) on the website.
 
 ## Install
 
-<a href="https://heroku.com/deploy?template=https://https://github.com/sridhar75/mockoon">
+<a href="https://heroku.com/deploy?template=https://github.com/sridhar75/mockoon">
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
 </a>
 
