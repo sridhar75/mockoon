@@ -1,0 +1,7 @@
+{
+  "name": "PythonSample",
+  "description": "A barebones Python app ",
+  "repository": "https://github.com/sridhar75/mockoon",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "keywords": ["node", "express", "static"]
+}
